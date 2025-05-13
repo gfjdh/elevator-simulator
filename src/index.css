@@ -1,0 +1,84 @@
+/* index.css */
+/* 清除默认边距 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.app {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.simulator-container {
+  position: relative;
+  border-left: 3px solid #666;
+  margin-top: 20px;
+}
+
+.building {
+  position: relative; /* 关键定位上下文 */
+  border-left: 3px solid #666;
+  margin-left: 200px; /* 给楼层按钮留出空间 */
+}
+
+/* 楼层样式 */
+.floor {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* 电梯轿厢 */
+.elevator {
+  width: 60px;
+  height: 60px;
+  background: #f0f0f0;
+  border: 2px solid #333;
+  position: absolute;
+  transition: top 0.5s ease-in-out;
+}
+
+/* 楼层按钮 */
+.buttons button {
+  margin-left: 10px;
+  padding: 5px 10px;
+}
+
+/* 电梯井 */
+.elevator-shafts {
+  height: 100%; /* 继承父容器高度 */
+  transform: translateY(30px); /* 微调垂直位置 */
+  position: absolute;
+  right: 20px;
+  top: 0;
+  bottom: 0;
+  width: 300px; /* 明确宽度 */
+  display: flex;
+  gap: 30px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 29px,
+    #ddd 30px
+  ); /* 添加电梯井道条纹 */
+}
+
+/* 电梯 */
+.elevator {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background: #fff;
+  border: 2px solid #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
