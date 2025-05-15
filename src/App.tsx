@@ -4,6 +4,7 @@ import { useStore } from './stores/useStore'
 import { Scheduler } from './core/scheduler'
 import Building from './components/Building'
 import StartScreen from './components/StartScreen' // 确保引入StartScreen
+import ControlPanel from './components/ControlPanel'
 
 function App() {
   const { initialized, config, requests, processMovement } = useStore()
@@ -14,7 +15,7 @@ function App() {
     if (requests.length > 0) {
       const [request] = requests
       const elevatorId = scheduler.assignRequest(request)
-      
+
       if (elevatorId !== -1) {
         useStore.getState().updateElevator(elevatorId, {
           targetFloors: [...useStore.getState().elevators[elevatorId].targetFloors, request.floor]
@@ -37,8 +38,11 @@ function App() {
   return (
     <div className="app">
       <h1>电梯模拟系统（楼层数：{config.floors}）</h1>
-      <div className="simulator-container">
-        <Building />
+      <div style={{ display: 'flex' }}>
+        <div className="simulator-container">
+          <Building />
+        </div>
+        <ControlPanel />
       </div>
     </div>
   )

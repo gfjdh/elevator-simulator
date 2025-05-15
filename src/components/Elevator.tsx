@@ -13,7 +13,7 @@ const Elevator = ({ data }: { data: ElevatorState }) => {
       left: data.id * 80,
       transition: `top ${config.movementSpeed}s linear`
     }}>
-      Elevator {data.id}
+      Elevator {data.id + 1}
     </div>
   )
 }
