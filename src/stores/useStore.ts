@@ -6,13 +6,15 @@ interface StoreState {
   elevators: ElevatorState[]
   requests: ElevatorRequest[]
   config: BuildingConfig
+  initialized: boolean
+  initializeConfig: (floors: number, elevators: number) => void
   addRequest: (request: ElevatorRequest) => void
   updateElevator: (id: number, update: Partial<ElevatorState>) => void
   processMovement: () => void
 }
 
 export const useStore = create<StoreState>((set, get) => ({
-  elevators: Array.from({ length: 4 }, (_, i) => ({
+  elevators: Array.from({ length: 8 }, (_, i) => ({
     id: i,
     currentFloor: 0,
     targetFloors: [],
@@ -21,12 +23,12 @@ export const useStore = create<StoreState>((set, get) => ({
   })),
   requests: [],
   config: {
-    floors: 10,
-    elevators: 4,
-    floorHeight: 80, // px
-    movementSpeed: 0.5
+    floors: 0,
+    elevators: 0,
+    floorHeight: 0, // px
+    movementSpeed: 0
   },
-
+  initialized: false,
   addRequest: (request) =>
     set(state => ({ requests: [...state.requests, request] })),
 
@@ -68,5 +70,21 @@ export const useStore = create<StoreState>((set, get) => ({
         }
       }
     })
-  }
+  },
+  initializeConfig: (floors, elevators) => set({
+    config: {
+      floors,
+      elevators,
+      floorHeight: 73, // px
+      movementSpeed: 0.5
+    },
+    elevators: Array.from({ length: elevators }, (_, i) => ({
+      id: i,
+      currentFloor: 0,
+      targetFloors: [],
+      status: 'idle',
+      direction: 'none'
+    })),
+    initialized: true
+  }),
 }))

@@ -21,10 +21,10 @@ const Building = () => {
       <div className="elevator-shafts" style={{
         width: config.elevators * 80, // 根据电梯数量计算宽度
         position: 'absolute',
-        top: 0,
+        top: 20,
         left: 70,
       }}>
-        <div style={{ width: config.elevators * 80, height: `${config.floors * config.floorHeight}px`, background: 'gray' }}>电梯井道</div>
+        <div style={{ width: config.elevators * 80, height: `${config.floors * config.floorHeight}px`, background: 'gray' }}></div>
         {elevators.map(elev => (<Elevator key={elev.id} data={elev} />))}
       </div>
     </div>

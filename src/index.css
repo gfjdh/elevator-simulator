@@ -6,6 +6,19 @@
   padding: 0;
 }
 
+/* 开始界面样式 */
+.start-screen {
+  text-align: center;
+}
+.start-screen label {
+  display: block;
+  margin: 15px 0;
+}
+.start-screen input[type="range"] {
+  width: 200px;
+  margin: 0 10px;
+}
+
 .app {
   padding: 20px;
   max-width: 1200px;

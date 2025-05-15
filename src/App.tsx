@@ -3,9 +3,10 @@ import { useEffect } from 'react'
 import { useStore } from './stores/useStore'
 import { Scheduler } from './core/scheduler'
 import Building from './components/Building'
+import StartScreen from './components/StartScreen' // 确保引入StartScreen
 
 function App() {
-  const { config, requests, processMovement } = useStore()
+  const { initialized, config, requests, processMovement } = useStore()
   const scheduler = new Scheduler(useStore.getState().elevators)
 
   // 处理请求队列
@@ -30,6 +31,8 @@ function App() {
     }, 1000)
     return () => clearInterval(interval)
   }, [])
+
+  if (!initialized) return <StartScreen />
 
   return (
     <div className="app">
