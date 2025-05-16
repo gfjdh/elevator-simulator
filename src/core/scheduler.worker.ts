@@ -25,7 +25,7 @@ self.onmessage = function (e) {
 
         const timeDiff = newTime - baseTime
         const loadFactor = targetFloors.length * 0.3
-        const directionMatch = isDirectionMatch(elevator, request) ? -0.5 : 0
+        const directionMatch = isDirectionMatch(elevator, request) ? -0.5 : 99
         const distance = Math.abs(currentFloor - request.floor) * 0.2
 
         return timeDiff + loadFactor + directionMatch + distance
@@ -40,11 +40,20 @@ self.onmessage = function (e) {
     }
 
     const isDirectionMatch = (elevator: any, request: any) => {
+        // 电梯空闲时匹配任何请求
         if (elevator.direction === 'none') return true
-        if (elevator.direction === 'up' && request.floor >= elevator.currentFloor) return true
-        if (elevator.direction === 'down' && request.floor <= elevator.currentFloor) return true
+        
+        // 电梯上行时：只匹配请求楼层高于当前且方向一致的上行请求
+        if (elevator.direction === 'up') {
+          return request.floor >= elevator.currentFloor && request.direction === 'up'
+        }
+        
+        // 电梯下行时：只匹配请求楼层低于当前且方向一致的下行请求
+        if (elevator.direction === 'down') {
+          return request.floor <= elevator.currentfloor && request.direction === 'down'
+        }
         return false
-    }
+      }
 
     const scores = elevators.map((elevator: any) => ({
         id: elevator.id,

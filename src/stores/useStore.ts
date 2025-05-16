@@ -36,26 +36,35 @@ export const useStore = create<StoreState>((set, get) => ({
     set(state => ({
       elevators: state.elevators.map(elev => {
         if (elev.id === id) {
-          // 应用更新，并处理 targetFloors 的排序
-          const updatedElev = { ...elev, ...update };
+          const updatedElev = { ...elev, ...update }
+          
+          // 智能合并目标楼层
           if (update.targetFloors) {
-            // 去重并排序
-            let sortedFloors = [...new Set(update.targetFloors)];
-            if (updatedElev.direction === 'up') {
-              sortedFloors.sort((a, b) => a - b);
-            } else if (updatedElev.direction === 'down') {
-              sortedFloors.sort((a, b) => b - a);
+            const mergedFloors = [...new Set([...elev.targetFloors, ...update.targetFloors])]
+            
+            // 动态方向判断
+            const currentDirection = updatedElev.direction
+            const currentFloor = updatedElev.currentFloor
+            
+            // LOOK算法排序
+            if (currentDirection === 'up') {
+              mergedFloors.sort((a, b) => a - b)
+              // 移除已经过的楼层
+              updatedElev.targetFloors = mergedFloors.filter(f => f >= currentFloor)
+            } else if (currentDirection === 'down') {
+              mergedFloors.sort((a, b) => b - a)
+              // 移除已经过的楼层
+              updatedElev.targetFloors = mergedFloors.filter(f => f <= currentFloor)
             } else {
-              // 空闲时按距离当前楼层排序
-              sortedFloors.sort((a, b) =>
-                Math.abs(a - updatedElev.currentFloor) - Math.abs(b - updatedElev.currentFloor)
-              );
+              // 空闲时按最近距离排序
+              mergedFloors.sort((a, b) => 
+                Math.abs(a - currentFloor) - Math.abs(b - currentFloor)
+              )
             }
-            updatedElev.targetFloors = sortedFloors;
           }
-          return updatedElev;
+          return updatedElev
         }
-        return elev;
+        return elev
       })
     })),
 
