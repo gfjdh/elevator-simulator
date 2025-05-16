@@ -110,7 +110,7 @@ export const useStore = create<StoreState>((set, get) => ({
       floors,
       elevators,
       floorHeight: 73, // px
-      movementSpeed: 0.5
+      movementSpeed: 0.7
     },
     elevators: Array.from({ length: elevators }, (_, i) => ({
       id: i,
