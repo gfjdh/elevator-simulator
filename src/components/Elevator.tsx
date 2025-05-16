@@ -24,7 +24,7 @@ const Elevator = ({ data }: { data: ElevatorState }) => {
       fontWeight: 'bold'
     }}>
       <div style={{ fontSize: 10 }}>
-      <div>目标: {data.targetFloors.map(floor => floor + 1).join(',')}</div>
+      <div>目标: {data.targetFloors.map(floor => floor + 1).join(',') || '无'}</div>
         <div>方向: {data.direction}</div>
       </div>
     </div>
