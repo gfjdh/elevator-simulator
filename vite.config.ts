@@ -1,7 +1,13 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// vite.config.ts
+import { defineConfig } from 'vite';
+import legacy from '@vitejs/plugin-legacy';
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-})
+export default defineConfig(() => {
+  return {
+    plugins: [
+      legacy({
+        targets: ['defaults', 'not IE 11'],
+      }),
+    ],
+  };
+});

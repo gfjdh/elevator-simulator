@@ -3,35 +3,49 @@ import { useEffect } from 'react'
 import { useStore } from './stores/useStore'
 import { Scheduler } from './core/scheduler'
 import Building from './components/Building'
-import StartScreen from './components/StartScreen' // 确保引入StartScreen
+import StartScreen from './components/StartScreen'
 import ControlPanel from './components/ControlPanel'
 
 function App() {
-  const { initialized, config, requests, processMovement } = useStore()
+  const { initialized, config, requests } = useStore()
   const scheduler = new Scheduler(useStore.getState().elevators)
+
+  // 添加定时器处理电梯移动
+  useEffect(() => {
+    const interval = setInterval(() => {
+      useStore.getState().processMovement()
+    }, config.movementSpeed * 1000) // 根据移动速度设置间隔
+    return () => clearInterval(interval)
+  }, [config.movementSpeed])
 
   // 处理请求队列
   useEffect(() => {
-    if (requests.length > 0) {
-      const [request] = requests
-      const elevatorId = scheduler.assignRequest(request)
-
-      if (elevatorId !== -1) {
-        useStore.getState().updateElevator(elevatorId, {
-          targetFloors: [...useStore.getState().elevators[elevatorId].targetFloors, request.floor]
-        })
-        useStore.setState({ requests: requests.slice(1) })
+    const processRequests = async () => {
+      if (requests.length > 0) {
+        const [request] = requests
+        try {
+          const elevatorId = await scheduler.assignRequest(request)
+          
+          if (elevatorId !== -1) {
+            useStore.getState().updateElevator(elevatorId, {
+              targetFloors: [
+                ...useStore.getState().elevators[elevatorId].targetFloors,
+                request.floor
+              ]
+            })
+            // 保持最新状态引用
+            useStore.setState(state => ({
+              requests: state.requests.slice(1)
+            }))
+          }
+        } catch (error) {
+          console.error('调度失败:', error)
+        }
       }
     }
+  
+    processRequests()
   }, [requests])
-
-  // 启动电梯移动循环
-  useEffect(() => {
-    const interval = setInterval(() => {
-      processMovement()
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [])
 
   if (!initialized) return <StartScreen />
 
