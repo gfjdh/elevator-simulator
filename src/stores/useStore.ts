@@ -36,35 +36,35 @@ export const useStore = create<StoreState>((set) => ({
     set(state => ({
       elevators: state.elevators.map(elev => {
         if (elev.id === id) {
-          const updatedElev = { ...elev, ...update }
-
-          // 智能合并目标楼层
+          const updatedElev = { ...elev, ...update };
+          
           if (update.targetFloors) {
-            const mergedFloors = [...new Set([...elev.targetFloors, ...update.targetFloors])]
-
-            // 动态方向判断
-            const currentDirection = updatedElev.direction
-            const currentFloor = updatedElev.currentFloor
-
-            // LOOK算法排序
+            const mergedFloors = [...new Set([...elev.targetFloors, ...update.targetFloors])];
+            const currentFloor = updatedElev.currentFloor;
+            const currentDirection = updatedElev.direction;
+  
+            // 新的排序逻辑
             if (currentDirection === 'up') {
-              mergedFloors.sort((a, b) => a - b)
-              // 移除已经过的楼层
-              updatedElev.targetFloors = mergedFloors.filter(f => f >= currentFloor)
+              // 上行时：先处理所有上行目标，再处理下行目标
+              const upFloors = mergedFloors.filter(f => f >= currentFloor).sort((a, b) => a - b);
+              const downFloors = mergedFloors.filter(f => f < currentFloor).sort((a, b) => b - a);
+              updatedElev.targetFloors = [...upFloors, ...downFloors];
             } else if (currentDirection === 'down') {
-              mergedFloors.sort((a, b) => b - a)
-              // 移除已经过的楼层
-              updatedElev.targetFloors = mergedFloors.filter(f => f <= currentFloor)
+              // 下行时：先处理所有下行目标，再处理上行目标
+              const downFloors = mergedFloors.filter(f => f <= currentFloor).sort((a, b) => b - a);
+              const upFloors = mergedFloors.filter(f => f > currentFloor).sort((a, b) => a - b);
+              updatedElev.targetFloors = [...downFloors, ...upFloors];
             } else {
               // 空闲时按最近距离排序
-              mergedFloors.sort((a, b) =>
+              mergedFloors.sort((a, b) => 
                 Math.abs(a - currentFloor) - Math.abs(b - currentFloor)
-              )
+              );
+              updatedElev.targetFloors = mergedFloors;
             }
           }
-          return updatedElev
+          return updatedElev;
         }
-        return elev
+        return elev;
       })
     })),
 
