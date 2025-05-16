@@ -45,25 +45,30 @@ export const useStore = create<StoreState>((set, get) => ({
       if (elev.targetFloors.length > 0) {
         const target = elev.targetFloors[0]
         if (elev.currentFloor !== target) {
-          const newFloor = elev.currentFloor + (target > elev.currentFloor ? 1 : -1)
+          const direction = target > elev.currentFloor ? 'up' : 'down'
+          const newFloor = elev.currentFloor + (direction === 'up' ? 1 : -1)
           set({
             elevators: state.elevators.map(e =>
               e.id === elev.id ? {
                 ...e,
                 currentFloor: newFloor,
                 status: 'moving',
-                direction: target > newFloor ? 'up' : 'down'
+                direction: direction
               } : e
             )
           })
         } else {
           // 到达目标楼层
+          const nextTarget = elev.targetFloors[1]
+          const newDirection = nextTarget !== undefined ?
+            (nextTarget > elev.currentFloor ? 'up' : 'down') : 'none'
           set({
             elevators: state.elevators.map(e =>
               e.id === elev.id ? {
                 ...e,
                 targetFloors: e.targetFloors.slice(1),
-                status: e.targetFloors.length > 1 ? 'moving' : 'idle'
+                status: e.targetFloors.length > 1 ? 'moving' : 'idle',
+                direction: newDirection
               } : e
             )
           })
