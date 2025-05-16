@@ -13,7 +13,7 @@ interface StoreState {
   processMovement: () => void
 }
 
-export const useStore = create<StoreState>((set, get) => ({
+export const useStore = create<StoreState>((set) => ({
   elevators: Array.from({ length: 8 }, (_, i) => ({
     id: i,
     currentFloor: 0,
@@ -37,15 +37,15 @@ export const useStore = create<StoreState>((set, get) => ({
       elevators: state.elevators.map(elev => {
         if (elev.id === id) {
           const updatedElev = { ...elev, ...update }
-          
+
           // 智能合并目标楼层
           if (update.targetFloors) {
             const mergedFloors = [...new Set([...elev.targetFloors, ...update.targetFloors])]
-            
+
             // 动态方向判断
             const currentDirection = updatedElev.direction
             const currentFloor = updatedElev.currentFloor
-            
+
             // LOOK算法排序
             if (currentDirection === 'up') {
               mergedFloors.sort((a, b) => a - b)
@@ -57,7 +57,7 @@ export const useStore = create<StoreState>((set, get) => ({
               updatedElev.targetFloors = mergedFloors.filter(f => f <= currentFloor)
             } else {
               // 空闲时按最近距离排序
-              mergedFloors.sort((a, b) => 
+              mergedFloors.sort((a, b) =>
                 Math.abs(a - currentFloor) - Math.abs(b - currentFloor)
               )
             }
@@ -69,41 +69,37 @@ export const useStore = create<StoreState>((set, get) => ({
     })),
 
   processMovement: () => {
-    const state = get()
-    state.elevators.forEach(elev => {
-      if (elev.targetFloors.length > 0) {
-        const target = elev.targetFloors[0]
-        if (elev.currentFloor !== target) {
-          const direction = target > elev.currentFloor ? 'up' : 'down'
-          const newFloor = elev.currentFloor + (direction === 'up' ? 1 : -1)
-          set({
-            elevators: state.elevators.map(e =>
-              e.id === elev.id ? {
-                ...e,
-                currentFloor: newFloor,
-                status: 'moving',
-                direction: direction
-              } : e
-            )
-          })
+    set((state) => {
+      // 原子化更新所有电梯状态
+      const newElevators = state.elevators.map(elev => {
+        if (elev.targetFloors.length === 0) return elev;
+
+        // 独立处理每个电梯的移动逻辑
+        const nextFloor = elev.targetFloors[0];
+        const movement = nextFloor - elev.currentFloor;
+
+        // 生成新状态但不立即应用
+        const newState = { ...elev };
+
+        if (movement !== 0) {
+          // 移动中状态
+          newState.currentFloor += movement > 0 ? 1 : -1;
+          newState.status = 'moving';
+          newState.direction = movement > 0 ? 'up' : 'down';
         } else {
           // 到达目标楼层
-          const nextTarget = elev.targetFloors[1]
-          const newDirection = nextTarget !== undefined ?
-            (nextTarget > elev.currentFloor ? 'up' : 'down') : 'none'
-          set({
-            elevators: state.elevators.map(e =>
-              e.id === elev.id ? {
-                ...e,
-                targetFloors: e.targetFloors.slice(1),
-                status: e.targetFloors.length > 1 ? 'moving' : 'idle',
-                direction: newDirection
-              } : e
-            )
-          })
+          newState.targetFloors = elev.targetFloors.slice(1);
+          newState.status = newState.targetFloors.length > 0 ? 'moving' : 'idle';
+          newState.direction = newState.targetFloors.length > 0
+            ? (newState.targetFloors[0] > newState.currentFloor ? 'up' : 'down')
+            : 'none';
         }
-      }
-    })
+
+        return newState;
+      });
+
+      return { elevators: newElevators };
+    });
   },
   initializeConfig: (floors, elevators) => set({
     config: {
