@@ -7,7 +7,7 @@ interface StoreState {
   requests: ElevatorRequest[]
   config: BuildingConfig
   initialized: boolean
-  initializeConfig: (floors: number, elevators: number) => void
+  initializeConfig: (floors: number, elevators: number, movementSpeed: number) => void
   addRequest: (request: ElevatorRequest) => void
   updateElevator: (id: number, update: Partial<ElevatorState>) => void
   processMovement: () => void
@@ -101,12 +101,12 @@ export const useStore = create<StoreState>((set) => ({
       return { elevators: newElevators };
     });
   },
-  initializeConfig: (floors, elevators) => set({
+  initializeConfig: (floors, elevators, Speed) => set({
     config: {
       floors,
       elevators,
       floorHeight: 73, // px
-      movementSpeed: 0.7
+      movementSpeed: Speed
     },
     elevators: Array.from({ length: elevators }, (_, i) => ({
       id: i,
