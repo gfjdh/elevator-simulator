@@ -17,7 +17,7 @@ function App() {
     }, config.movementSpeed * 1000) // 根据移动速度设置间隔
     return () => clearInterval(interval)
   }, [config.movementSpeed])
-
+ 
   // 处理请求队列
   useEffect(() => {
     const processRequests = async () => {

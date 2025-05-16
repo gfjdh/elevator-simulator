@@ -34,9 +34,29 @@ export const useStore = create<StoreState>((set, get) => ({
 
   updateElevator: (id, update) =>
     set(state => ({
-      elevators: state.elevators.map(elev =>
-        elev.id === id ? { ...elev, ...update } : elev
-      )
+      elevators: state.elevators.map(elev => {
+        if (elev.id === id) {
+          // 应用更新，并处理 targetFloors 的排序
+          const updatedElev = { ...elev, ...update };
+          if (update.targetFloors) {
+            // 去重并排序
+            let sortedFloors = [...new Set(update.targetFloors)];
+            if (updatedElev.direction === 'up') {
+              sortedFloors.sort((a, b) => a - b);
+            } else if (updatedElev.direction === 'down') {
+              sortedFloors.sort((a, b) => b - a);
+            } else {
+              // 空闲时按距离当前楼层排序
+              sortedFloors.sort((a, b) =>
+                Math.abs(a - updatedElev.currentFloor) - Math.abs(b - updatedElev.currentFloor)
+              );
+            }
+            updatedElev.targetFloors = sortedFloors;
+          }
+          return updatedElev;
+        }
+        return elev;
+      })
     })),
 
   processMovement: () => {
