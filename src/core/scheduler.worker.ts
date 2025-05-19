@@ -3,6 +3,7 @@ self.onmessage = function (e) {
     const { elevators, request } = e.data
 
     const calculateScore = (elevator: any) => {
+        if (elevator.alarm || elevator.status === 'doorOpen') return Infinity // 增加门开启状态排除
         const currentFloor = elevator.currentFloor
         const targetFloors = [...elevator.targetFloors]
         const direction = elevator.direction

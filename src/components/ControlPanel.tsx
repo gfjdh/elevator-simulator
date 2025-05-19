@@ -8,11 +8,53 @@ const ControlPanel = () => {
   const currentElevator = elevators.find(e => e.id === selectedElevator)
 
   const handleFloorSelect = (floor: number) => {
-    if (!currentElevator) return
-    
+    if (!currentElevator || currentElevator.alarm) return
     const newTargets = [...currentElevator.targetFloors, floor]
     updateElevator(selectedElevator, {
       targetFloors: [...new Set(newTargets)] // 去重
+    })
+  }
+
+  const handleOpenDoor = () => {
+    if (!currentElevator) return
+
+    if (['idle', 'doorOpen'].includes(currentElevator.status)) {
+      // 重置定时器
+      if (currentElevator.doorTimer) clearTimeout(currentElevator.doorTimer)
+      const timer = window.setTimeout(() => {
+        useStore.getState().updateElevator(selectedElevator, {
+          status: 'idle',
+          doorStatus: 'closed',
+          doorTimer: undefined
+        })
+      }, 5000)
+
+      updateElevator(selectedElevator, {
+        status: 'doorOpen',
+        doorStatus: 'open',
+        doorTimer: timer
+      })
+    }
+  }
+
+  const handleCloseDoor = () => {
+    if (!currentElevator || currentElevator.status !== 'doorOpen') return
+    if (currentElevator.doorTimer) clearTimeout(currentElevator.doorTimer)
+    updateElevator(selectedElevator, {
+      status: currentElevator.targetFloors.length ? 'moving' : 'idle',
+      doorStatus: 'closed',
+      doorTimer: undefined
+    })
+  }
+
+  const handleAlarm = () => {
+    if (currentElevator?.doorTimer) clearTimeout(currentElevator.doorTimer)
+    updateElevator(selectedElevator, {
+      alarm: true,
+      targetFloors: [],
+      status: 'idle',
+      direction: 'none',
+      doorTimer: undefined // 清除定时器
     })
   }
 
@@ -29,7 +71,7 @@ const ControlPanel = () => {
     }}>
       <div style={{ marginBottom: '20px' }}>
         <label>选择电梯：</label>
-        <select 
+        <select
           value={selectedElevator}
           onChange={(e) => setSelectedElevator(Number(e.target.value))}
           style={{ padding: '5px', width: '100%' }}
@@ -52,7 +94,28 @@ const ControlPanel = () => {
             <p>当前楼层：{currentElevator.currentFloor + 1} 层</p>
           </div>
 
-          <div style={{ 
+          <div style={{ marginBottom: '15px' }}>
+            <button
+              onClick={handleOpenDoor}
+              disabled={!['idle', 'doorOpen'].includes(currentElevator.status)}
+            >
+              开门
+            </button>
+            <button
+              onClick={handleCloseDoor}
+              disabled={currentElevator.status !== 'doorOpen'}
+            >
+              关门
+            </button>
+            <button
+              onClick={handleAlarm}
+              disabled={currentElevator.alarm}
+            >
+              警报
+            </button>
+          </div>
+
+          <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '10px'
@@ -63,8 +126,8 @@ const ControlPanel = () => {
                 onClick={() => handleFloorSelect(floor)}
                 style={{
                   padding: '10px',
-                  background: currentElevator.targetFloors.includes(floor) 
-                    ? '#4CAF50' 
+                  background: currentElevator.targetFloors.includes(floor)
+                    ? '#4CAF50'
                     : '#e0e0e0',
                   border: '1px solid #ccc'
                 }}
