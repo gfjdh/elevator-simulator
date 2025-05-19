@@ -97,6 +97,11 @@ export const useStore = create<StoreState>((set) => ({
         // 生成新状态但不立即应用
         const newState = { ...elev };
 
+        if (elev.alarm) {
+          newState.targetFloors = [];
+          return newState;
+        }
+
         if (movement !== 0) {
           newState.currentFloor += movement > 0 ? 1 : -1
         } else {
