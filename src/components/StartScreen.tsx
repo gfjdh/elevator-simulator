@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useStore } from '../stores/useStore'
 
 const StartScreen = () => {
-  const [floors, setFloors] = useState(20)
+  const [floors, setFloors] = useState(10)
   const [elevators, setElevators] = useState(5)
   const [speed, setSpeed] = useState(0.7) // 添加速度状态
   const initialize = useStore(state => state.initializeConfig)
@@ -21,11 +21,11 @@ const StartScreen = () => {
       {/* 楼层配置 */}
       <div style={{ margin: '20px 0' }}>
         <label>
-          楼层数 (2-40):
+          楼层数 (2-20):
           <input
             type="range"
             min="2"
-            max="40"
+            max="20"
             value={floors}
             onChange={e => setFloors(Number(e.target.value))}
           />
